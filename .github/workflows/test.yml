@@ -30,9 +30,7 @@ jobs:
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
           sleep 40
           kubectl get nodes -o wide
-          kubectl get nodes -o jsonpath={.items[0].status.addresses[0].address}
           kubectl get pods -n argocd
-          kubectl get nodes -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address}
           kubectl get svc -n argocd
           kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
       - name: install argocd-cli
@@ -47,7 +45,9 @@ jobs:
           export nodeport=$(kubectl get svc -n argocd argocd-server -o jsonpath={.spec.ports[?\(@.port==80\)].nodePort});
           echo $nodeport;
           export nodeip=$(kubectl get nodes -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address});
-          argocd login $nodeip:$nodeport --insecure --plaintext --username=admin --password=$password
+          echo $nodeip;
+          echo "hi"
+          argocd login $nodeip:$nodeport --insecure --username=admin --password=$password
           argocd app list
       - name: argocd resource install
         run: |
