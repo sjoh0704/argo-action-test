@@ -47,7 +47,7 @@ jobs:
           export nodeport=$(kubectl get svc -n argocd argocd-server -o jsonpath={.spec.ports[?\(@.port==80\)].nodePort});
           echo $nodeport;
           export nodeip=$(kubectl get nodes -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address});
-          argocd login $nodeip:$nodeport --plaintext --username=admin --password=$password
+          argocd login $nodeip:$nodeport --insecure --plaintext --username=admin --password=$password
           argocd app list
       - name: argocd resource install
         run: |
