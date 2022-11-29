@@ -39,14 +39,16 @@ jobs:
       - name: argocd resource deploy
         run: |
           kubectl apply -f application/app_of_apps/.
-          argocd app list
-          echo $GITHUB_REPOSITORY
+          echo https://github.com/$GITHUB_REPOSITORY
           echo $GITHUB_HEAD_REF
+          
+      - name: argocd parameter setting
+        run: 
           argocd app set master-applications --repo=https://github.com/$GITHUB_REPOSITORY 
           argocd app set master-applications --revision=$GITHUB_HEAD_REF
           argocd app set master-applications --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY
           argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF
-          argocd app get master-applications
+          argocd app get master-applications -o yaml
 
       - name: argocd master app sync
         run: |
