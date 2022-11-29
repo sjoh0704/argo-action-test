@@ -51,6 +51,13 @@ jobs:
         run: |
           kubectl apply -f application/app_of_apps/.
           argocd app list
+          echo $GITHUB_REPOSITORY
+          echo $GITHUB_REF_NAME
+          argocd app get master-applications
+          argocd app set master-applications --repo=https://$GITHUB_REPOSITORY 
+          argocd app set master-applications --revision=$GITHUB_REF_NAME
+          argocd app get master-applications
+
       - name: argocd master app sync
         run: |
           argocd app sync master-applications
@@ -58,6 +65,8 @@ jobs:
       - name: argocd sub app sync 
         run: |
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})
+          for m in $modules;do argocd app set $m --repo=https://$GITHUB_REPOSITORY;done
+          for m in $modules;do argocd app set $m --revision=$GITHUB_REF_NAME;done          
           for m in $modules;do argocd app sync $m --preview-changes <<<no;done
         
 
