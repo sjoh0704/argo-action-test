@@ -13,6 +13,6 @@ spec:
       isDefault: false
       version: 1
       editable: true
-      jsonData:d
+      jsonData:
         tlsSkipVerify: true
-        timeInterval: "5s"
+        timeInterval: "5s"sd
