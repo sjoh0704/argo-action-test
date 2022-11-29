@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  kind:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
