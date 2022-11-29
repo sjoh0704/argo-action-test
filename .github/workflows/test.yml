@@ -55,37 +55,10 @@ jobs:
         run: |
           argocd app sync master-applications
       
-      - name: argocd sub app sync
-        env: 
-          modules: cicd-operator catalog-controller
+      - name: argocd sub app sync 
         run: |
+          export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})
           for m in $modules;do argocd app sync $m --preview-changes <<<no;done
-  # argocd app sync --preview-changes cicd-operator 
-  # argocd app sync --preview-changes cluster-api-provider-vsphere
-  # argocd app sync --preview-changes catalog-controller
-  # argocd app sync --preview-changes argocd
-  # argocd app sync --preview-changes cluster-api
-  # argocd app sync --preview-changes cluster-api-provider-aws
-  # argocd app sync --preview-changes cluster-api-provider-vsphere
-  # argocd app sync --preview-changes gitlab
-  # argocd app sync --preview-changes grafana-operator
-  # argocd app sync --preview-changes helm-apiserver
-  # argocd app sync --preview-changes hyperauth                                                       
-  # argocd app sync --preview-changes hypercloud                                                      
-  # argocd app sync --preview-changes hyperregistry                                                   
-  # argocd app sync --preview-changes image-validating-webhook
-  # argocd app sync --preview-changes istio        
-  # argocd app sync --preview-changes jaeger                                                                  
-  # argocd app sync --preview-changes kiali                                                                   
-  # argocd app sync --preview-changes loki                                                                    
-  # argocd app sync --preview-changes opensearch
-  # argocd app sync --preview-changes prometheus                                                                     
-  # argocd app sync --preview-changes redis-operator
-  # argocd app sync --preview-changes service-binding-operator
-  # argocd app sync --preview-changes single-applications
-  # argocd app sync --preview-changes tekton-pipeline
-  # argocd app sync --preview-changes tekton-trigger
-  # argocd app sync --preview-changes template-service-broker
         
 
         
