@@ -53,9 +53,10 @@ jobs:
           argocd app list
           echo $GITHUB_REPOSITORY
           echo $GITHUB_REF_NAME
-          argocd app get master-applications
           argocd app set master-applications --repo=https://github.com/$GITHUB_REPOSITORY 
           argocd app set master-applications --revision=$GITHUB_REF_NAME
+          argocd app set master-applications --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY
+          argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_REF_NAME
           argocd app get master-applications
 
       - name: argocd master app sync
