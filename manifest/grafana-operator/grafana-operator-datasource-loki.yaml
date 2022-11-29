@@ -15,4 +15,4 @@ spec:
       editable: true
       jsonData:
         tlsSkipVerify: true
-        timeInterval: "5s"sd
+        timeInterval: "5s"
