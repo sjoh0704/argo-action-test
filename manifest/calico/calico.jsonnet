@@ -10,7 +10,7 @@ function(
     vxlanMode="Never",
     vxlanVNI=4096,
     vxlanPort=4789,
-    datastore="kubernetes",
+    datastore="kubernetes",fd
     is_offline="false",
     private_registry="172.22.6.2:5000",
     calico_version="v3.17.6",
