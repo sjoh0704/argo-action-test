@@ -18,12 +18,6 @@ jobs:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.3.0
-      # - name: cluster info
-      #   run: |
-      #     kubectl cluster-info
-      #     kubectl get pods -n kube-system
-      #     echo "current-context:" $(kubectl config current-context)
-      #     echo "environment-kubeconfig:" ${KUBECONFIG}
       - name: install argocd
         run: |
           kubectl create namespace argocd
@@ -68,14 +62,8 @@ jobs:
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
           for m in $modules
           do 
-            argocd app sync $m --preview-changes <<<no > /dev/null 2>&1
-            if [ "$?" -ne 0 ]
-            then
-              echo "Sync check fails: $m"
-              argocd app sync $m --preview-changes
-            else
-              echo "Argocd sync checked: $m"
-            fi
+            echo "Argocd sync check: $m"
+            argocd app sync $m --preview-changes <<<no 1> /dev/null
           done
         
 
