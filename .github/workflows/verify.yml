@@ -57,7 +57,7 @@ jobs:
           argocd app set master-applications --revision=$GITHUB_HEAD_REF
           argocd app set master-applications --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY
           argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF
-          argocd app get master-applications
+          argocd app get master-applications -o yaml
 
       - name: argocd master app sync
         run: |
