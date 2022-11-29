@@ -27,6 +27,8 @@ jobs:
           kubectl create namespace argocd
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
           kubectl get pods -n argocd
+          sleep 30
+          kubectl get pods -n argocd
           VERSION=v2.2.5; curl -sL -o argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64
           chmod +x argocd
           sudo mv argocd /usr/local/bin/argocd
