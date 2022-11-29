@@ -53,6 +53,7 @@ jobs:
         run: |
           kubectl apply -f application/app_of_apps/.
           kubectl get app -A
+          argocd app list
       - name: Test1
         run: exit 1
       - name: Test2
