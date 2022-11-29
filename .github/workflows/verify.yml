@@ -58,6 +58,7 @@ jobs:
           argocd app sync master-applications
       
       - name: argocd sub app sync 
+        continue-on-error: true
         id: subapp
         run: |
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
