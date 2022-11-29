@@ -1,6 +1,4 @@
 {{ $isMaster := eq .Values.global.cluster "master" }}
-{{ if (and .Values.modules.calico.enabled (not $isMaster)) }}
-{{ $isMaster := eq .Values.global.cluster "master" }}
 {{ $prefix := printf "%s-%s" .Values.global.clusterNamespace .Values.global.clusterName }}
 {{ $module := "calico" }}
 apiVersion: argoproj.io/v1alpha1
@@ -36,4 +34,3 @@ spec:
     # path: manifest/calico
     # repoURL: {{ .Values.spec.source.repoURL }}
     # targetRevision: {{ .Values.spec.source.targetRevision }}
-{{ end }}
