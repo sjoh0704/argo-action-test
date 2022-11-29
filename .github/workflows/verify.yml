@@ -41,14 +41,14 @@ jobs:
           kubectl apply -f application/app_of_apps/.
           echo https://github.com/$GITHUB_REPOSITORY
           echo $GITHUB_HEAD_REF
-          
+
       - name: argocd parameter setting
         run: 
-          argocd app set master-applications --repo=https://github.com/$GITHUB_REPOSITORY 
-          argocd app set master-applications --revision=$GITHUB_HEAD_REF
-          argocd app set master-applications --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY
-          argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF
-          argocd app get master-applications -o yaml
+          argocd app set master-applications --repo=https://github.com/$GITHUB_REPOSITORY;
+          argocd app set master-applications --revision=$GITHUB_HEAD_REF;
+          argocd app set master-applications --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
+          argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+          argocd app get master-applications -o yaml;
 
       - name: argocd master app sync
         run: |
@@ -66,7 +66,6 @@ jobs:
             argocd app sync $m --preview-changes <<<no > /dev/null
           done
       - name: argocd sub app error check
-        if: ${{ always() }}
         run: |
           argocd app sync ${{ steps.subapp.outputs.module }} --preview-changes <<<no
           echo "Checked argocd sub module error successfully"
