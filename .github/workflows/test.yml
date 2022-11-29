@@ -28,11 +28,10 @@ jobs:
         run: |
           kubectl create namespace argocd
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-          sleep 40
-          kubectl get nodes -o wide
+          kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+          sleep 30
           kubectl get pods -n argocd
           kubectl get svc -n argocd
-          kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
       - name: install argocd-cli
         run: |
           VERSION=v2.2.5; curl -sL -o argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64
@@ -41,21 +40,22 @@ jobs:
       - name: argocd login
         run: |
           export password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d);
-          echo $password;
           export nodeport=$(kubectl get svc -n argocd argocd-server -o jsonpath={.spec.ports[?\(@.port==80\)].nodePort});
-          echo $nodeport;
           export nodeip=$(kubectl get nodes -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address});
-          echo $nodeip;
-          echo "hi"
           argocd login $nodeip:$nodeport --insecure --username=admin --password=$password
           argocd app list
-      - name: argocd resource install
+      - name: argocd resource deploy
         run: |
           kubectl apply -f application/app_of_apps/.
           kubectl get app -A
           argocd app list
-      - name: Test1
-        run: exit 1
+      - name: argocd app sync
+        run: |
+          sleep 10
+          argocd app list
+          argocd app sync master-applications
+          argocd app list 
+
       - name: Test2
         run: exit 1
       - name: Test3
