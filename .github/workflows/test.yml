@@ -18,19 +18,20 @@ jobs:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.3.0
-      - name: cluster info
-        run: |
-          kubectl cluster-info
-          kubectl get pods -n kube-system
-          echo "current-context:" $(kubectl config current-context)
-          echo "environment-kubeconfig:" ${KUBECONFIG}
+      # - name: cluster info
+      #   run: |
+      #     kubectl cluster-info
+      #     kubectl get pods -n kube-system
+      #     echo "current-context:" $(kubectl config current-context)
+      #     echo "environment-kubeconfig:" ${KUBECONFIG}
       - name: install argocd
         run: |
           kubectl create namespace argocd
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
           sleep 40
+          kubectl get nodes -o wide
+          kubectl get nodes -o jsonpath={.items[0].status.addresses[0].address}
           kubectl get pods -n argocd
-          kubectl get ingress -n argocd
           kubectl get svc -n argocd
       - name: install argocd-cli
         run: |
