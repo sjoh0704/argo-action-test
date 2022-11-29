@@ -63,14 +63,8 @@ jobs:
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
           for m in $modules
           do 
-            argocd app sync $m --preview-changes <<<no > /dev/null 2>&1
-            if [ "$?" -ne 0 ]
-            then
-              echo "Sync check fails: $m"
-              argocd app sync $m --preview-changes
-            else
-              echo "Argocd sync checked: $m"
-            fi
+            argocd app sync $m --preview-changes <<<no
+
           done
         
 
