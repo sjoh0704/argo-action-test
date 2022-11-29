@@ -20,7 +20,7 @@ local admin_info = if is_master_cluster == "true" then "" else "admin_user = " +
 [
   {
     "kind": "ConfigMap",
-    "apiVersion": "v1",ds
+    "apiVersion": "v1",
     "metadata": {
       "name": "grafana-config",
       "namespace": "monitoring"
