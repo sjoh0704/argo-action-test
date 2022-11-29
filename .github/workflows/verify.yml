@@ -15,15 +15,15 @@ jobs:
         uses: helm/kind-action@v1.3.0
       - name: install argocd
         run: |
-          kubectl create namespace argocd
-          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-          kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
-          kubectl get pods -n argocd
+          kubectl create namespace argocd;
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml;
+          kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}';
+          kubectl get pods -n argocd;
       - name: install argocd-cli
         run: |
-          VERSION=v2.5.2; curl -sL -o argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64
-          chmod +x argocd
-          sudo mv argocd /usr/local/bin/argocd
+          VERSION=v2.5.2; curl -sL -o argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64;
+          chmod +x argocd;
+          sudo mv argocd /usr/local/bin/argocd;
 
       - name: argocd login 
         uses: nick-fields/retry@v2
@@ -34,13 +34,13 @@ jobs:
             export password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d);
             export nodeport=$(kubectl get svc -n argocd argocd-server -o jsonpath={.spec.ports[?\(@.port==80\)].nodePort});
             export nodeip=$(kubectl get nodes -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address});
-            argocd login $nodeip:$nodeport --insecure --username=admin --password=$password
+            argocd login $nodeip:$nodeport --insecure --username=admin --password=$password;
   
       - name: argocd resource deploy
         run: |
-          kubectl apply -f application/app_of_apps/.
-          echo https://github.com/$GITHUB_REPOSITORY
-          echo $GITHUB_HEAD_REF
+          kubectl apply -f application/app_of_apps/.;
+          echo https://github.com/$GITHUB_REPOSITORY;
+          echo $GITHUB_HEAD_REF;
 
       - name: argocd parameter setting
         run: 
@@ -48,27 +48,62 @@ jobs:
           argocd app set master-applications --revision=$GITHUB_HEAD_REF;
           argocd app set master-applications --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
           argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
-          argocd app get master-applications -o yaml;
+          argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+          argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+          argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+          
+          argocd app set master-applications --parameter modules.calico.enabled=true;
+          argocd app set master-applications --parameter modules.gitlab.enabled=true;
+          argocd app set master-applications --parameter modules.gitea.enabled=true;
+          argocd app set master-applications --parameter modules.gatewayBootstrap.enabled=true;
+          argocd app set master-applications --parameter modules.strimziKafka.enabled=true;
+          argocd app set master-applications --parameter modules.serviceBinding.enabled=true;
+          argocd app set master-applications --parameter modules.hyperAuth.enabled=true;
+          argocd app set master-applications --parameter modules.argocd.enabled=true;
+          argocd app set master-applications --parameter modules.opensearch.enabled=true;
+          argocd app set master-applications --parameter modules.loki.enabled=true;
+          argocd app set master-applications --parameter modules.prometheus.enabled=true;
+          argocd app set master-applications --parameter modules.grafanaOperator.enabled=true;
+          argocd app set master-applications --parameter modules.serviceMesh.istio.enabled=true;
+          argocd app set master-applications --parameter modules.serviceMesh.jaeger.enabled=true;
+          argocd app set master-applications --parameter modules.serviceMesh.kiali.enabled=true;
+          argocd app set master-applications --parameter modules.capi.enabled=true;
+          argocd app set master-applications --parameter modules.capi.providers.aws.enabled=true;
+          argocd app set master-applications --parameter modules.capi.providers.vsphere.enabled=true;
+          argocd app set master-applications --parameter modules.tsb.enabled=true;
+          argocd app set master-applications --parameter modules.catalogController.enabled=true;
+          argocd app set master-applications --parameter modules.helmApiserver.enabled=true;
+          argocd app set master-applications --parameter modules.hyperCloud.enabled=true;
+          argocd app set master-applications --parameter modules.hyperregistry.enabled=true;
+          argocd app set master-applications --parameter modules.tektonPipeline.enabled=true;
+          argocd app set master-applications --parameter modules.tektonTrigger.enabled=true;
+          argocd app set master-applications --parameter modules.cicd.enabled=true;
+          argocd app set master-applications --parameter modules.redis.enabled=true;
+          argocd app set master-applications --parameter modules.imageValidatingWebhook.enabled=true;
+          argocd app set master-applications --parameter modules.nfs.enabled=true;
+          argocd app set master-applications --parameter modules.cephfs.enabled=true;
+          argocd app set master-applications --parameter modules.rbd.enabled=true;          
+          argocd app set master-applications --parameter modules.efs.enabled=true;
 
       - name: argocd master app sync
         run: |
-          argocd app sync master-applications
+          argocd app sync master-applications;
       
       - name: argocd sub app sync 
         continue-on-error: true
         id: subapp
         run: |
-          export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
+          export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name});     
           for m in $modules
           do
-            echo "module=$m" >> $GITHUB_OUTPUT 
-            echo "argocd sync checked: $m"
-            argocd app sync $m --preview-changes <<<no > /dev/null
+            echo "module=$m" >> $GITHUB_OUTPUT; 
+            echo "argocd sync checked: $m";
+            argocd app sync $m --preview-changes <<<no > /dev/null;
           done
       - name: argocd sub app error check
         run: |
-          argocd app sync ${{ steps.subapp.outputs.module }} --preview-changes <<<no
-          echo "Checked argocd sub module error successfully"
+          argocd app sync ${{ steps.subapp.outputs.module }} --preview-changes <<<no;
+          echo "Checked argocd sub module error successfully";
 
 
 
