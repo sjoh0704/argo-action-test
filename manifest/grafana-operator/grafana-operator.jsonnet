@@ -26,7 +26,7 @@ local admin_info = if is_master_cluster == "true" then "" else "admin_user = " +
 
 [
 	{
-	  "apiVersion": "apps/v1",
+	  "apiVersion": "apps/v1",d
 	  "kind": "Deployment",
 	  "metadata": {
 		"labels": {

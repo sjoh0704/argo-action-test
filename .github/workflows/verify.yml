@@ -68,6 +68,7 @@ jobs:
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
           for m in $modules
           do 
+            echo $m
             errpage=$(argocd app sync $m --preview-changes <<<no);
             if [ "$?" -ne 0 ]
             then
