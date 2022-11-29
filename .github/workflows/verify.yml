@@ -58,14 +58,20 @@ jobs:
           argocd app sync master-applications
       
       - name: argocd sub app sync 
-        continue-on-error: true
+        id: subapp
         run: |
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
           for m in $modules
-          do 
-            argocd app sync $m --preview-changes <<<no
-
+          do
+            echo "::set-output name=module::$m" 
+            echo "argocd sync checked: $m"
+            argocd app sync $m --preview-changes <<<no > /dev/null
           done
+      - name: argocd sub app error check
+        if: ${{ always() }}
+        run: |
+          argocd app sync ${{ steps.subapp.outputs.module }} --preview-changes <<<no
+
         
 
         
