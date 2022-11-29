@@ -28,8 +28,10 @@ jobs:
         run: |
           kubectl create namespace argocd
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-          sleep 10
+          sleep 20
           kubectl get pods -n argocd
+          kubectl get ingress -n argocd
+          kubectl get svc -n argocd
       - name: install argocd-cli
         run: |
           VERSION=v2.2.5; curl -sL -o argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64
@@ -37,10 +39,14 @@ jobs:
           sudo mv argocd /usr/local/bin/argocd
       - name: argocd login
         run: |
-          password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d); echo $password
+          export password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d);
+          export argocd_svc=$(kubectl get svc -n argocd argocd-server -o jsonpath={.spec.clusterIP})
+          argocd login $argocd_svc --plaintext --username=admin --password=$password
+          argocd app list
+      - name: argocd resource install
+        run: |
           kubectl apply -f application/app_of_apps/.
           kubectl get app -A
-          argocd version
       - name: Test1
         run: exit 1
       - name: Test2
