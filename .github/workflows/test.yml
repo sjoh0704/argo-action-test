@@ -18,21 +18,38 @@ jobs:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.3.0
-      - name: Testing
+      - name: cluster info
         run: |
           kubectl cluster-info
           kubectl get pods -n kube-system
           echo "current-context:" $(kubectl config current-context)
           echo "environment-kubeconfig:" ${KUBECONFIG}
+      - name: install argocd
+        run: |
           kubectl create namespace argocd
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+          sleep 10
           kubectl get pods -n argocd
-          sleep 30
-          kubectl get pods -n argocd
+      - name: install argocd-cli
+        run: |
           VERSION=v2.2.5; curl -sL -o argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64
           chmod +x argocd
           sudo mv argocd /usr/local/bin/argocd
-          password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+      - name: argocd login
+        run: |
+          password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d); echo $password
           kubectl apply -f application/app_of_apps/.
+          kubectl get app -A
+          argocd version
+      - name: Test1
+        run: exit 1
+      - name: Test2
+        run: exit 1
+      - name: Test3
+        run: exit 0
+        
+
+        
+
 
 
