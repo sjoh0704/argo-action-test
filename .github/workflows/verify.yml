@@ -1,29 +1,18 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Verify ArgoCD app
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   pull_request:
     branches: [ "main" ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  kind:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.3.0
-      # - name: cluster info
-      #   run: |
-      #     kubectl cluster-info
-      #     kubectl get pods -n kube-system
-      #     echo "current-context:" $(kubectl config current-context)
-      #     echo "environment-kubeconfig:" ${KUBECONFIG}
       - name: install argocd
         run: |
           kubectl create namespace argocd
@@ -64,17 +53,24 @@ jobs:
           argocd app sync master-applications
       
       - name: argocd sub app sync 
+        continue-on-error: true
+        id: subapp
         run: |
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
           for m in $modules
-          do 
-            echo $m
-            errpage=$(argocd app sync $m --preview-changes <<<no);
-            if [ "$?" -ne 0 ]
-            then
-              echo "$errpage"
-            fi
+          do
+            echo "module=$m" >> $GITHUB_OUTPUT 
+            echo "argocd sync checked: $m"
+            argocd app sync $m --preview-changes <<<no > /dev/null
           done
+      - name: argocd sub app error check
+        if: ${{ always() }}
+        run: |
+          argocd app sync ${{ steps.subapp.outputs.module }} --preview-changes <<<no
+          echo "Checked argocd sub module error successfully"
+
+
+
         
 
         
