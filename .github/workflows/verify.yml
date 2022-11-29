@@ -64,7 +64,6 @@ jobs:
           export modules=$(kubectl get app -n argocd -o jsonpath={.items[*].metadata.name})     
           for m in $modules
           do
-            echo "::set-output name=module::$m"
             echo "module=$m" >> $GITHUB_OUTPUT 
             echo "argocd sync checked: $m"
             argocd app sync $m --preview-changes <<<no > /dev/null
@@ -73,6 +72,9 @@ jobs:
         if: ${{ always() }}
         run: |
           argocd app sync ${{ steps.subapp.outputs.module }} --preview-changes <<<no
+          echo "Checked argocd sub module error successfully"
+
+
 
         
 
