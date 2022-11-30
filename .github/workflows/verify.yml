@@ -29,7 +29,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     env:
-      APPLICATION: ${{ github.event.inputs.application }}-applications
+      APPLICATION: ${{ github.event.inputs.application || 'master' }}-applications
     steps:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
@@ -65,28 +65,35 @@ jobs:
           kubectl apply -f application/app_of_apps/.;
 
       - name: Set essential params to root application
-        run: 
-          echo "Repository=https://github.com/$GITHUB_REPOSITORY";
-          echo "Branch=$GITHUB_HEAD_REF"
-          argocd app set $APPLICATION --repo=https://github.com/$GITHUB_REPOSITORY;
-          argocd app set $APPLICATION --revision=$GITHUB_HEAD_REF;
-          argocd app set $APPLICATION --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
-          argocd app set $APPLICATION --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
-          argocd app set $APPLICATION --parameter global.clusterName=in-cluster;
-          argocd app set $APPLICATION --parameter global.clusterNamespace=default;
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 10
+          max_attempts: 10
+          command: |
+            echo "Repository=https://github.com/$GITHUB_REPOSITORY";
+            echo "Branch=$GITHUB_HEAD_REF";
+            argocd app set $APPLICATION --repo=https://github.com/$GITHUB_REPOSITORY;
+            argocd app set $APPLICATION --revision=$GITHUB_HEAD_REF;
+            argocd app set $APPLICATION --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
+            argocd app set $APPLICATION --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+            argocd app set $APPLICATION --parameter global.clusterName=in-cluster;
+            argocd app set $APPLICATION --parameter global.clusterNamespace=default;
 
       # 모든 모듈에 대해서 test할지 여부
       - name: Enabled all modules 
-        if: ${{ github.event.inputs.test_range == 'All' }} 
+        if: ${{ (github.event.inputs.test_range || 'All') == 'All' }} 
         env:
-          TEST_RANGE: ${{ github.event.inputs.test_range }}
           # 사용하고 있는 모듈 list를 명시 
           MODULE_LIST: | 
             calico gitlab gitea gatewayBootstrap strimziKafka serviceBinding hyperAuth argocd opensearch loki prometheus grafanaOperator
             serviceMesh.istio serviceMesh.jaeger serviceMesh.kiali capi capi.providers.aws capi.providers.vsphere tsb catalogController
             helmApiserver hyperCloud hyperregistry tektonPipeline tektonTrigger cicd redis imageValidatingWebhook nfs cephfs rbd efs
-        run: 
-          for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 20
+          max_attempts: 5
+          command: |
+            for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
 
       - name: Sync argocd root application
         run: |
