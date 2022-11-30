@@ -65,15 +65,19 @@ jobs:
           kubectl apply -f application/app_of_apps/.;
 
       - name: Set essential params to root application
-        run: 
-          echo "Repository=https://github.com/$GITHUB_REPOSITORY";
-          echo "Branch=$GITHUB_HEAD_REF"
-          argocd app set $APPLICATION --repo=https://github.com/$GITHUB_REPOSITORY;
-          argocd app set $APPLICATION --revision=$GITHUB_HEAD_REF;
-          argocd app set $APPLICATION --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
-          argocd app set $APPLICATION --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
-          argocd app set $APPLICATION --parameter global.clusterName=in-cluster;
-          argocd app set $APPLICATION --parameter global.clusterNamespace=default;
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 10
+          max_attempts: 10
+          command: |
+            echo "Repository=https://github.com/$GITHUB_REPOSITORY";
+            echo "Branch=$GITHUB_HEAD_REF";
+            argocd app set $APPLICATION --repo=https://github.com/$GITHUB_REPOSITORY;
+            argocd app set $APPLICATION --revision=$GITHUB_HEAD_REF;
+            argocd app set $APPLICATION --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
+            argocd app set $APPLICATION --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+            argocd app set $APPLICATION --parameter global.clusterName=in-cluster;
+            argocd app set $APPLICATION --parameter global.clusterNamespace=default;
 
       # 모든 모듈에 대해서 test할지 여부
       - name: Enabled all modules 
