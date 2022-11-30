@@ -66,7 +66,7 @@ jobs:
           BRANCH=$GITHUB_HEAD_REF 
           if [ "$BRANCH" = "" ]
           then
-              BRANCH=$GITHUB_BASE_REF;
+              BRANCH=$GITHUB_REF_NAME;
           fi
           echo Repository=$REPO;
           echo Branch=$BRANCH;
@@ -120,7 +120,7 @@ jobs:
             BRANCH=$GITHUB_HEAD_REF 
             if [ "$BRANCH" = "" ]
             then
-                BRANCH=$GITHUB_BASE_REF;
+                BRANCH=$GITHUB_REF_NAME;
             fi
             echo Repository=$REPO;
             echo Branch=$BRANCH;
