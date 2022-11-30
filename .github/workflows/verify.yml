@@ -53,6 +53,14 @@ jobs:
           echo $GITHUB_ACTION_REPOSITORY
           echo 6
           echo $GITHUB_SERVER_URL
+          echo 7
+          echo $GITHUB_ACTOR
+          echo 8
+          echo $GITHUB_REF
+          echo 9
+          echo $GITHUB_REPOSITORY_OWNER
+          echo 10
+
           
           
       - uses: actions/checkout@master
