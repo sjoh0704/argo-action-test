@@ -24,13 +24,3 @@ spec:
     path: manifest/calico
     repoURL: {{ .Values.spec.source.repoURL }}
     targetRevision: {{ .Values.spec.source.targetRevision }}
-    # helm:
-    #  parameters:
-    #    - name: global.registry.is_offline
-    #      ## string이 아니면 에러가 나기 때문에 "" 지우면 안됨
-    #      value: "{{ .Values.global.network.disabled }}"
-    #    - name: global.registry.private_registry
-    #      value: {{ .Values.global.privateRegistry }}
-    # path: manifest/calico
-    # repoURL: {{ .Values.spec.source.repoURL }}
-    # targetRevision: {{ .Values.spec.source.targetRevision }}
