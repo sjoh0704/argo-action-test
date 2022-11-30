@@ -35,10 +35,12 @@ jobs:
       - name: Create k8s Kind Cluster
 
         uses: helm/kind-action@v1.3.0
+        env: 
+          ARGOCD_VERSION: v2.2.5 
       - name: Install Argocd
         run: |
           kubectl create namespace argocd;
-          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml;
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/$ARGOCD_VERSION/manifests/install.yaml;
           kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}';
 
       - name: Install Argocd cli
