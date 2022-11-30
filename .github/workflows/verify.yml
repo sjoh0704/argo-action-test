@@ -61,6 +61,16 @@ jobs:
           echo $GITHUB_REPOSITORY_OWNER
           echo 10
 
+          REPO=$(echo $GITHUB_REPOSITORY | cut -d '/' -f2)
+          REPO=$GITHUB_SERVER_URL/$GITHUB_ACTOR/$REPO
+          BRANCH=$GITHUB_HEAD_REF 
+          if [ "$BRANCH" = "" ]
+          then
+              BRANCH=$GITHUB_BASE_REF;
+          fi
+          echo Repository=$REPO;
+          echo Branch=$BRANCH;
+
           
           
       - uses: actions/checkout@master
@@ -105,7 +115,8 @@ jobs:
           timeout_seconds: 20
           max_attempts: 5
           command: |
-            REPO=https://github.com/$GITHUB_REPOSITORY;
+            REPO=$(echo $GITHUB_REPOSITORY | cut -d '/' -f2)
+            REPO=$GITHUB_SERVER_URL/$GITHUB_ACTOR/$REPO
             BRANCH=$GITHUB_HEAD_REF 
             if [ "$BRANCH" = "" ]
             then
