@@ -16,7 +16,7 @@ on:
         - single
         required: true
       test_range:
-        description: '모든 모듈에 대해서 테스트할지 여부'
+        description: '모든 모듈에 대해 테스트 여부'
         default: All
         type: choice
         options:
@@ -31,6 +31,7 @@ jobs:
     env:
       ARGOCD_VERSION: v2.2.5 
       ARGOCD_CLI_VERSION: v2.5.2
+      K8S_VERSION: v1.22.15
       APPLICATION: ${{ github.event.inputs.application || 'master' }}-applications
       # 사용하고 있는 모듈 list를 명시 
       MODULE_LIST: | 
@@ -45,8 +46,8 @@ jobs:
         uses: helm/kind-action@v1.3.0
         with: 
           cluster_name: argocd-testing
-          kubectl_version: v1.22.15
-          node_image: kindest/node:v1.22.15
+          kubectl_version: ${{ env.K8S_VERSION }}
+          node_image: kindest/node:${{ env.K8S_VERSION }}
 
       - name: Install Argocd
         run: |
@@ -96,7 +97,7 @@ jobs:
         if: ${{ (github.event.inputs.test_range || 'All') == 'All' }} 
         uses: nick-fields/retry@v2
         with:
-          timeout_seconds: 20
+          timeout_seconds: 60
           max_attempts: 5
           command: |
             for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
