@@ -5,10 +5,22 @@ on:
     branches: [ "main" ]
 
   workflow_dispatch:
+    inputs:
+      application: 
+        description: 'master-application/single-application 사용 여부'
+        default: master
+        type: choice
+        options:
+        - master
+        - single
+        required: true
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      APP_TYPE: ${{ github.event.inputs.application }}
+      APPLICATION: ${{ github.event.inputs.application }}-applications
     steps:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
@@ -37,12 +49,13 @@ jobs:
             NODE_IP=$(kubectl get nodes -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address});
             argocd login $NODE_IP:$NODEPORT --insecure --username=admin --password=$PASSWORD;
   
-      - name: Deploy Master Application
+      - name: Deploy $APP_TYPE application
         run: |
           kubectl apply -f application/app_of_apps/.;
 
-      - name: Set essential params to master application
+      - name: Set essential params to $APP_TYPE application
         env:
+          # 사용하고 있는 모듈 list를 명시 
           MODULE_LIST: | 
             calico gitlab gitea gatewayBootstrap strimziKafka serviceBinding hyperAuth argocd opensearch loki prometheus grafanaOperator
             serviceMesh.istio serviceMesh.jaeger serviceMesh.kiali capi capi.providers.aws capi.providers.vsphere tsb catalogController
@@ -50,15 +63,15 @@ jobs:
         run: 
           echo "Repository=https://github.com/$GITHUB_REPOSITORY";
           echo "Branch=$GITHUB_HEAD_REF"
-          argocd app set master-applications --repo=https://github.com/$GITHUB_REPOSITORY;
-          argocd app set master-applications --revision=$GITHUB_HEAD_REF;
-          argocd app set master-applications --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
-          argocd app set master-applications --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
-          for module in $MODULE_LIST;do argocd app set master-applications --parameter modules.$module.enabled=true;done
+          argocd app set $APPLICATION --repo=https://github.com/$GITHUB_REPOSITORY;
+          argocd app set $APPLICATION --revision=$GITHUB_HEAD_REF;
+          argocd app set $APPLICATION --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
+          argocd app set $APPLICATION --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+          for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
 
-      - name: Sync argocd master application
+      - name: Sync argocd $APP_TYPE application
         run: |
-          argocd app sync master-applications;
+          argocd app sync $APPLICATION;
       
       - name: Sync argocd sub application
         continue-on-error: true
