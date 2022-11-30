@@ -46,6 +46,7 @@ jobs:
         with: 
           cluster_name: argocd-testing
           kubectl_version: v1.22.15
+          node_image: kindest/node:v1.22.15
 
       - name: Install Argocd
         run: |
@@ -98,7 +99,7 @@ jobs:
           timeout_seconds: 20
           max_attempts: 5
           command: |
-            for module in $MODULE_LIST;do echo $module argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
+            for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
 
       - name: Sync argocd root application
         run: |
