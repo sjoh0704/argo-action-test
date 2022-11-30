@@ -51,7 +51,6 @@ jobs:
 
       - name: Install Argocd
         run: |
-          kubectl get node -o wide
           kubectl create namespace argocd;
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/$ARGOCD_VERSION/manifests/install.yaml;
           kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}';
@@ -80,15 +79,22 @@ jobs:
       - name: Set essential params to root application
         uses: nick-fields/retry@v2
         with:
-          timeout_seconds: 10
-          max_attempts: 10
+          timeout_seconds: 20
+          max_attempts: 5
           command: |
-            echo "Repository=https://github.com/$GITHUB_REPOSITORY";
-            echo "Branch=$GITHUB_HEAD_REF";
-            argocd app set $APPLICATION --repo=https://github.com/$GITHUB_REPOSITORY;
-            argocd app set $APPLICATION --revision=$GITHUB_HEAD_REF;
-            argocd app set $APPLICATION --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
-            argocd app set $APPLICATION --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+            REPO=https://github.com/$GITHUB_REPOSITORY";
+            BRANCH=$GITHUB_HEAD_REF 
+            if [ $BRANCH = "" ]
+            then
+                BRANCH=$GITHUB_BASE_REPO;
+            fi
+            echo Repository=$REPO;
+            echo Branch=$BRANCH;
+
+            argocd app set $APPLICATION --repo=$REPO;
+            argocd app set $APPLICATION --revision=$BRANCH;
+            argocd app set $APPLICATION --parameter spec.source.repoURL=$REPO;
+            argocd app set $APPLICATION --parameter spec.source.targetRevision=$BRANCH;
             argocd app set $APPLICATION --parameter global.clusterName=in-cluster;
             argocd app set $APPLICATION --parameter global.clusterNamespace=default;
 
