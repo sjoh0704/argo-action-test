@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ "main" ]
 
-  # 수동 세팅 
+  # workflow 수동 세팅 
   workflow_dispatch:
     inputs:
       application: 
@@ -24,7 +24,7 @@ on:
         - Only modules specified in the app
         required: false
       
-
+# job
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -33,12 +33,14 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
+
         uses: helm/kind-action@v1.3.0
       - name: Install Argocd
         run: |
           kubectl create namespace argocd;
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml;
           kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}';
+
       - name: Install Argocd cli
         env: 
           ARGOCD_CLI_VERSION: v2.5.2
@@ -73,8 +75,9 @@ jobs:
           argocd app set $APPLICATION --parameter global.clusterName=in-cluster;
           argocd app set $APPLICATION --parameter global.clusterNamespace=default;
 
+      # 모든 모듈에 대해서 test할지 여부
       - name: Enabled all modules 
-        if: ${{ github.event.inputs.test_range }} == "All"
+        if: ${{ github.event.inputs.test_range == 'All' }} 
         env:
           TEST_RANGE: ${{ github.event.inputs.test_range }}
           # 사용하고 있는 모듈 list를 명시 
@@ -89,6 +92,7 @@ jobs:
         run: |
           argocd app sync $APPLICATION;
       
+      # sub app을 sync후 error가 발생한 module을 저장하여 다음 step에서 처리 
       - name: Sync argocd sub application
         continue-on-error: true
         id: subapp
