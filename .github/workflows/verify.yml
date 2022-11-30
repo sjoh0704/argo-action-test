@@ -29,24 +29,32 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     env:
+      ARGOCD_VERSION: v2.2.5 
+      ARGOCD_CLI_VERSION: v2.5.2
       APPLICATION: ${{ github.event.inputs.application || 'master' }}-applications
+      # 사용하고 있는 모듈 list를 명시 
+      MODULE_LIST: | 
+        calico gitlab gitea gatewayBootstrap strimziKafka serviceBinding hyperAuth argocd opensearch loki prometheus grafanaOperator
+        serviceMesh.istio serviceMesh.jaeger serviceMesh.kiali capi capi.providers.aws capi.providers.vsphere tsb catalogController
+        helmApiserver hyperCloud hyperregistry tektonPipeline tektonTrigger cicd redis imageValidatingWebhook nfs cephfs rbd efs
+
     steps:
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
 
         uses: helm/kind-action@v1.3.0
+        with: 
+          cluster_name: argocd-testing
+          kubectl_version: v1.22.15
 
       - name: Install Argocd
-        env: 
-          ARGOCD_VERSION: v2.2.5 
         run: |
+          kubectl get node -o wide
           kubectl create namespace argocd;
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/$ARGOCD_VERSION/manifests/install.yaml;
           kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}';
 
       - name: Install Argocd cli
-        env: 
-          ARGOCD_CLI_VERSION: v2.5.2
         run: |
           curl -sL -o argocd https://github.com/argoproj/argo-cd/releases/download/$ARGOCD_CLI_VERSION/argocd-linux-amd64;
           chmod +x argocd;
@@ -85,18 +93,12 @@ jobs:
       # 모든 모듈에 대해서 test할지 여부
       - name: Enabled all modules 
         if: ${{ (github.event.inputs.test_range || 'All') == 'All' }} 
-        env:
-          # 사용하고 있는 모듈 list를 명시 
-          MODULE_LIST: | 
-            calico gitlab gitea gatewayBootstrap strimziKafka serviceBinding hyperAuth argocd opensearch loki prometheus grafanaOperator
-            serviceMesh.istio serviceMesh.jaeger serviceMesh.kiali capi capi.providers.aws capi.providers.vsphere tsb catalogController
-            helmApiserver hyperCloud hyperregistry tektonPipeline tektonTrigger cicd redis imageValidatingWebhook nfs cephfs rbd efs
         uses: nick-fields/retry@v2
         with:
           timeout_seconds: 20
           max_attempts: 5
           command: |
-            for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
+            for module in $MODULE_LIST;do echo $module argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
 
       - name: Sync argocd root application
         run: |
