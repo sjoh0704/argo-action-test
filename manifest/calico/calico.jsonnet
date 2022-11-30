@@ -7,7 +7,7 @@ function(
     iptablesBackend="Auto",
     calico_backend="bird",
     ipipMode="Always",
-    vxlanMode="Never",
+    vxlanMode="Never",d
     vxlanVNI=4096,
     vxlanPort=4789,
     datastore="kubernetes",fdd
