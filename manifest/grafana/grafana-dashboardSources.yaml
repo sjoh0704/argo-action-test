@@ -15,7 +15,7 @@ data:
             }
         ]
     }
-kind: ConfigMap
+kind: ConfigMaps
 metadata:
   name: grafana-dashboards
   namespace: monitoring
