@@ -84,7 +84,7 @@ jobs:
           command: |
             REPO=https://github.com/$GITHUB_REPOSITORY";
             BRANCH=$GITHUB_HEAD_REF 
-            if [ $BRANCH = "" ]
+            if [ "$BRANCH" = "" ]
             then
                 BRANCH=$GITHUB_BASE_REPO;
             fi
