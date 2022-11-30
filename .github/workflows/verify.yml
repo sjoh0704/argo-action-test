@@ -82,7 +82,7 @@ jobs:
           timeout_seconds: 20
           max_attempts: 5
           command: |
-            REPO=https://github.com/$GITHUB_REPOSITORY";
+            REPO=https://github.com/$GITHUB_REPOSITORY;
             BRANCH=$GITHUB_HEAD_REF 
             if [ "$BRANCH" = "" ]
             then
