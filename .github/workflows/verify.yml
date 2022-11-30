@@ -81,16 +81,19 @@ jobs:
 
       # 모든 모듈에 대해서 test할지 여부
       - name: Enabled all modules 
-        if: ${{ github.event.inputs.test_range == 'All' }} 
+        if: ${{ (github.event.inputs.test_range || All) == 'All' }} 
         env:
-          TEST_RANGE: ${{ github.event.inputs.test_range }}
           # 사용하고 있는 모듈 list를 명시 
           MODULE_LIST: | 
             calico gitlab gitea gatewayBootstrap strimziKafka serviceBinding hyperAuth argocd opensearch loki prometheus grafanaOperator
             serviceMesh.istio serviceMesh.jaeger serviceMesh.kiali capi capi.providers.aws capi.providers.vsphere tsb catalogController
             helmApiserver hyperCloud hyperregistry tektonPipeline tektonTrigger cicd redis imageValidatingWebhook nfs cephfs rbd efs
-        run: 
-          for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 20
+          max_attempts: 5
+          command: |
+            for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
 
       - name: Sync argocd root application
         run: |
