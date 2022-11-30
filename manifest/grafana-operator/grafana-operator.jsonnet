@@ -27,7 +27,7 @@ local admin_info = if is_master_cluster == "true" then "" else "admin_user = " +
 [
 	{
 	  "apiVersion": "apps/v1",
-	  "kind": "Deployments",
+	  "kind": "Deployment"s,
 	  "metadata": {
 		"labels": {
 		  "control-plane": "grafana-operator"
