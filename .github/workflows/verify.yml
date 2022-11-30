@@ -81,7 +81,7 @@ jobs:
 
       # 모든 모듈에 대해서 test할지 여부
       - name: Enabled all modules 
-        if: ${{ (github.event.inputs.test_range || All) == 'All' }} 
+        if: ${{ (github.event.inputs.test_range || 'All') == 'All' }} 
         env:
           # 사용하고 있는 모듈 list를 명시 
           MODULE_LIST: | 
