@@ -40,6 +40,11 @@ jobs:
         helmApiserver hyperCloud hyperregistry tektonPipeline tektonTrigger cicd redis imageValidatingWebhook nfs cephfs rbd efs
 
     steps:
+      - run: |
+          echo 1
+          echo $GITHUB_BASE_REF
+          echo 2
+          echo $GITHUB_HEAD_REF
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
 
@@ -86,7 +91,7 @@ jobs:
             BRANCH=$GITHUB_HEAD_REF 
             if [ "$BRANCH" = "" ]
             then
-                BRANCH=$GITHUB_BASE_REPO;
+                BRANCH=$GITHUB_BASE_REF;
             fi
             echo Repository=$REPO;
             echo Branch=$BRANCH;
