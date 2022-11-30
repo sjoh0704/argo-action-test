@@ -40,39 +40,6 @@ jobs:
         helmApiserver hyperCloud hyperregistry tektonPipeline tektonTrigger cicd redis imageValidatingWebhook nfs cephfs rbd efs
 
     steps:
-      - run: |
-          echo 1
-          echo $GITHUB_BASE_REF
-          echo 2
-          echo $GITHUB_HEAD_REF
-          echo 3
-          echo $GITHUB_REF_NAME
-          echo 4
-          echo $GITHUB_REPOSITORY
-          echo 5
-          echo $GITHUB_ACTION_REPOSITORY
-          echo 6
-          echo $GITHUB_SERVER_URL
-          echo 7
-          echo $GITHUB_ACTOR
-          echo 8
-          echo $GITHUB_REF
-          echo 9
-          echo $GITHUB_REPOSITORY_OWNER
-          echo 10
-
-          REPO=$(echo $GITHUB_REPOSITORY | cut -d '/' -f2)
-          REPO=$GITHUB_SERVER_URL/$GITHUB_ACTOR/$REPO
-          BRANCH=$GITHUB_HEAD_REF 
-          if [ "$BRANCH" = "" ]
-          then
-              BRANCH=$GITHUB_REF_NAME;
-          fi
-          echo Repository=$REPO;
-          echo Branch=$BRANCH;
-
-          
-          
       - uses: actions/checkout@master
       - name: Create k8s Kind Cluster
 
