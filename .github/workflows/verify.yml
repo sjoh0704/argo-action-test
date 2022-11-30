@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [ "main" ]
 
+  # 수동 세팅 
   workflow_dispatch:
     inputs:
       application: 
@@ -67,6 +68,8 @@ jobs:
           argocd app set $APPLICATION --revision=$GITHUB_HEAD_REF;
           argocd app set $APPLICATION --parameter spec.source.repoURL=https://github.com/$GITHUB_REPOSITORY;
           argocd app set $APPLICATION --parameter spec.source.targetRevision=$GITHUB_HEAD_REF;
+          argocd app set $APPLICATION --parameter global.clusterName=in-cluster;
+          argocd app set $APPLICATION --parameter global.clusterNamespace=default;
           for module in $MODULE_LIST;do argocd app set $APPLICATION --parameter modules.$module.enabled=true;done
 
       - name: Sync argocd $APP_TYPE application
