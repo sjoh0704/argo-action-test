@@ -1,20 +1,17 @@
 name: Deploy
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      username:
-        description: 'A username passed from the caller workflow'
-        default: 'john-doe'
-        required: false
-        type: string
-    outputs:
-      workflow_output1:
-        description: "The first job output"
-        value: "test1"
-      workflow_output2:
-        description: "The second job output"
-        value: "test2"
+      module:
+        description: '모듈을 선택하세용'
+        required: true
+        default: 'capi' 
+        type: choice
+        options:
+        - capi
+        - tsb
+        - serviceMesh.istio 
 
 # job
 jobs:
